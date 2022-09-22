@@ -1,8 +1,10 @@
 package com.github.kitakkun.kottotto.event.manager
 
-import com.github.kitakkun.kottotto.event.EventStore
 import com.github.kitakkun.kottotto.database.TempChannel
+import com.github.kitakkun.kottotto.database.TempChannel.tempChannelId
 import com.github.kitakkun.kottotto.database.TempChannel.tempRoleId
+import com.github.kitakkun.kottotto.database.TempChannelDataModel
+import com.github.kitakkun.kottotto.event.EventStore
 import dev.minn.jda.ktx.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +12,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.Role
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -29,13 +30,25 @@ class TempChannelManager @Inject constructor(
             eventStore.guildVoiceJoinEvent.collect { event ->
                 val entry = getRegisteredData(event.channelJoined.idLong, event.guild.idLong)
                 if (entry == null) {
-                    val role = createTempChannel(
+                    // create private temporal channel and role.
+                    val data = createTempChannel(
                         name = event.channelJoined.name,
                         guild = event.guild,
                         bindingChannelId = event.channelJoined.idLong
                     )
-                    event.guild.addRoleToMember(event.member, role).queue()
+                    // register ids to database.
+                    registerTempChannel(
+                        bindingChannelId = data.bindingChannelId,
+                        roleId = data.roleId,
+                        channelId = data.channelId,
+                        guildId = data.guildId
+                    )
+                    // update member's role.
+                    event.guild.getRoleById(data.roleId)?.let {
+                        event.guild.addRoleToMember(event.member, it).queue()
+                    }
                 } else {
+                    // update member's role.
                     event.guild.getRoleById(entry[tempRoleId])?.let {
                         event.guild.addRoleToMember(event.member, it).queue()
                     }
@@ -44,22 +57,15 @@ class TempChannelManager @Inject constructor(
         }
         launch {
             eventStore.guildVoiceLeaveEvent.collect { event ->
-                val entry = getRegisteredData(event.channelLeft.idLong, event.guild.idLong)
-                entry?.let {
+                getRegisteredData(event.channelLeft.idLong, event.guild.idLong)?.let {
+                    // if no one exists in the voice channel...
                     if (event.channelLeft.members.size == 0) {
-                        event.guild.channels.find { channel -> channel.idLong == it[TempChannel.tempChannelId] }
-                            ?.delete()
-                            ?.queue()
-                        event.guild.roles.find { role -> role.idLong == it[TempChannel.tempRoleId] }?.delete()?.queue()
-                        transaction {
-                            addLogger(StdOutSqlLogger)
-                            TempChannel.deleteWhere {
-                                TempChannel.bindChannelId eq event.channelLeft.idLong
-                            }
-                        }
+                        deleteTempChannel(event.guild, it[tempChannelId], it[tempRoleId])
+                        deregisterTempChannel(it[TempChannel.bindChannelId], it[TempChannel.guildId])
                     } else {
-                        event.guild.getRoleById(entry[tempRoleId])?.let {
-                            event.guild.removeRoleFromMember(event.member, it).queue()
+                        // remove role from the member.
+                        event.guild.getRoleById(it[tempRoleId])?.let { role ->
+                            event.guild.removeRoleFromMember(event.member, role).queue()
                         }
                     }
                 }
@@ -72,26 +78,51 @@ class TempChannelManager @Inject constructor(
         }
     }
 
-    private suspend fun createTempChannel(guild: Guild, name: String, bindingChannelId: Long): Role {
+    private suspend fun createTempChannel(guild: Guild, name: String, bindingChannelId: Long): TempChannelDataModel {
         val role = guild.createRole().setName(name).await()
         val channel = guild.createTextChannel(name)
             .addRolePermissionOverride(role.idLong, EnumSet.of(Permission.VIEW_CHANNEL), null)
             .addRolePermissionOverride(guild.publicRole.idLong, null, EnumSet.of(Permission.VIEW_CHANNEL))
             .await()
+        return TempChannelDataModel(
+            bindingChannelId,
+            channelId = channel.idLong,
+            roleId = role.idLong,
+            guildId = guild.idLong
+        )
+    }
+
+    private suspend fun deleteTempChannel(guild: Guild, tempChannelId: Long, tempRoleId: Long) {
+        guild.channels.find { channel -> channel.idLong == tempChannelId }?.delete()?.queue()
+        guild.roles.find { role -> role.idLong == tempRoleId }?.delete()?.queue()
+    }
+
+    private fun registerTempChannel(bindingChannelId: Long, roleId: Long, channelId: Long, guildId: Long) =
         transaction {
             addLogger(StdOutSqlLogger)
             TempChannel.insert {
                 it[bindChannelId] = bindingChannelId
-                it[tempRoleId] = role.idLong
-                it[tempChannelId] = channel.idLong
-                it[guildId] = guild.idLong
+                it[tempRoleId] = roleId
+                it[tempChannelId] = channelId
+                it[TempChannel.guildId] = guildId
             }
         }
-        return role
-    }
+
+    private fun deregisterTempChannel(bindingChannelId: Long, guildId: Long) =
+        transaction {
+            addLogger(StdOutSqlLogger)
+            TempChannel.deleteWhere {
+                TempChannel.bindChannelId eq bindingChannelId
+                TempChannel.guildId eq guildId
+            }
+        }
 
     private fun getRegisteredData(bindChannelId: Long, guildId: Long): ResultRow? = transaction {
         addLogger(StdOutSqlLogger)
-        return@transaction TempChannel.select { TempChannel.bindChannelId eq bindChannelId }.firstOrNull()
+        return@transaction TempChannel.select {
+            TempChannel.bindChannelId eq bindChannelId
+            TempChannel.guildId eq guildId
+
+        }.firstOrNull()
     }
 }
