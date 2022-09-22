@@ -16,7 +16,6 @@ repositories {
     maven("https://m2.dv8tion.net/releases")
 }
 
-
 dependencies {
     testImplementation(kotlin("test"))
 
@@ -38,9 +37,7 @@ dependencies {
     // dagger
     implementation("com.google.dagger:dagger:2.44")
     annotationProcessor("com.google.dagger:dagger-compiler:2.44")
-
     kapt("com.google.dagger:dagger-compiler:2.44")
-
 }
 
 application {
@@ -52,5 +49,21 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
+}
+
+tasks.withType<Jar> {
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes["Main-Class"] = "${group}.${rootProject.name}.MainKt"
+    }
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }
