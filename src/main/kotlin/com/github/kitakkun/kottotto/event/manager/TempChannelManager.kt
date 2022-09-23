@@ -105,6 +105,7 @@ class TempChannelManager @Inject constructor(
     private fun registerTempChannel(bindingChannelId: Long, roleId: Long, channelId: Long, guildId: Long) =
         transaction {
             addLogger(StdOutSqlLogger)
+            addLogger(Slf4jSqlDebugLogger)
             TempChannel.insert {
                 it[bindChannelId] = bindingChannelId
                 it[tempRoleId] = roleId
@@ -116,6 +117,7 @@ class TempChannelManager @Inject constructor(
     private fun deregisterTempChannel(bindingChannelId: Long, guildId: Long) =
         transaction {
             addLogger(StdOutSqlLogger)
+            addLogger(Slf4jSqlDebugLogger)
             TempChannel.deleteWhere {
                 TempChannel.bindChannelId eq bindingChannelId
                 TempChannel.guildId eq guildId
@@ -125,6 +127,7 @@ class TempChannelManager @Inject constructor(
     private fun getRegisteredData(bindChannelId: Long, guildId: Long): ResultRow? = transaction {
         addLogger(StdOutSqlLogger)
     private fun getRegisteredData(bindChannelId: Long, guildId: Long): TempChannelDataModel? = transaction {
+        addLogger(Slf4jSqlDebugLogger)
         return@transaction TempChannel.select {
             TempChannel.bindChannelId eq bindChannelId
             TempChannel.guildId eq guildId
