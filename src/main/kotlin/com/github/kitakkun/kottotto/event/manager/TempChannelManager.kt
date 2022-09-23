@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.channel.concrete.Category
@@ -24,7 +25,10 @@ class TempChannelManager @Inject constructor(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + Job()
 
+    private val logger = KotlinLogging.logger {  }
+
     init {
+        logger.debug { "Initializing..." }
         launch {
             eventStore.guildVoiceJoinEvent.collect { event ->
                 val entry = getRegisteredData(event.channelJoined.idLong, event.guild.idLong)
@@ -71,14 +75,10 @@ class TempChannelManager @Inject constructor(
                 }
             }
         }
-        launch {
-            eventStore.readyEvent.collect {
-                println("READY")
-            }
-        }
     }
 
     private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, bindingChannelId: Long): TempChannelDataModel {
+        logger.debug { "Creating a temporal private text channel at guild ${guild.id}" }
         val role = guild.createRole().setName(name).await()
         val channel = guild.createTextChannel(name)
             .addRolePermissionOverride(role.idLong, EnumSet.of(Permission.VIEW_CHANNEL), null)
@@ -94,6 +94,7 @@ class TempChannelManager @Inject constructor(
     }
 
     private suspend fun deleteTempChannel(guild: Guild, tempChannelId: Long, tempRoleId: Long) {
+        logger.debug { "Deleting a temporal private text channel at guild ${guild.id}" }
         guild.channels.find { channel -> channel.idLong == tempChannelId }?.delete()?.queue()
         guild.roles.find { role -> role.idLong == tempRoleId }?.delete()?.queue()
     }
