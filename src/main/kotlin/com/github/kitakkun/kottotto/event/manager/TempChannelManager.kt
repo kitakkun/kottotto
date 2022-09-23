@@ -11,7 +11,9 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.channel.concrete.Category
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -25,53 +27,66 @@ class TempChannelManager @Inject constructor(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + Job()
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = KotlinLogging.logger { }
 
     init {
         logger.debug { "Initializing..." }
+
         launch {
-            eventStore.guildVoiceJoinEvent.collect { event ->
-                val entry = getRegisteredData(event.channelJoined.idLong, event.guild.idLong)
-                if (entry == null) {
-                    // create private temporal channel and role.
-                    val data = createTempChannel(
-                        name = event.channelJoined.name,
-                        parentCategory = event.guild.categories.find { it.voiceChannels.contains(event.channelJoined) },
-                        guild = event.guild,
-                        bindingChannelId = event.channelJoined.idLong
-                    )
-                    // register ids to database.
-                    registerTempChannel(
-                        bindingChannelId = data.bindingChannelId,
-                        roleId = data.roleId,
-                        channelId = data.channelId,
-                        guildId = data.guildId
-                    )
-                    // update member's role.
-                    event.guild.getRoleById(data.roleId)?.let {
-                        event.guild.addRoleToMember(event.member, it).queue()
-                    }
-                } else {
-                    // update member's role.
-                    event.guild.getRoleById(entry.roleId)?.let {
-                        event.guild.addRoleToMember(event.member, it).queue()
-                    }
-                }
+            eventStore.guildVoiceJoinEvent.collect { onJoin(it.channelJoined, it.guild, it.member) }
+        }
+
+        launch {
+            eventStore.guildVoiceLeaveEvent.collect { onLeave(it.channelLeft, it.guild, it.member) }
+        }
+
+        launch {
+            eventStore.guildVoiceMoveEvent.collect {
+                onLeave(it.channelLeft, it.guild, it.member)
+                onJoin(it.channelJoined, it.guild, it.member)
             }
         }
-        launch {
-            eventStore.guildVoiceLeaveEvent.collect { event ->
-                getRegisteredData(event.channelLeft.idLong, event.guild.idLong)?.let {
-                    // if no one exists in the voice channel...
-                    if (event.channelLeft.members.size == 0) {
-                        deleteTempChannel(event.guild, it.channelId, it.roleId)
-                        deregisterTempChannel(it.bindingChannelId, it.guildId)
-                    } else {
-                        // remove role from the member.
-                        event.guild.getRoleById(it.roleId)?.let { role ->
-                            event.guild.removeRoleFromMember(event.member, role).queue()
-                        }
-                    }
+    }
+
+    private suspend fun onJoin(channelJoined: AudioChannel, guild: Guild, member: Member) {
+        val entry = getRegisteredData(channelJoined.idLong, guild.idLong)
+        if (entry == null) {
+            // create private temporal channel and role.
+            val data = createTempChannel(
+                name = channelJoined.name,
+                parentCategory = guild.categories.find { it.voiceChannels.contains(channelJoined) },
+                guild = guild,
+                bindingChannelId = channelJoined.idLong
+            )
+            // register ids to database.
+            registerTempChannel(
+                bindingChannelId = data.bindingChannelId,
+                roleId = data.roleId,
+                channelId = data.channelId,
+                guildId = data.guildId
+            )
+            // update member's role.
+            guild.getRoleById(data.roleId)?.let {
+                guild.addRoleToMember(member, it).queue()
+            }
+        } else {
+            // update member's role.
+            guild.getRoleById(entry.roleId)?.let {
+                guild.addRoleToMember(member, it).queue()
+            }
+        }
+    }
+
+    private suspend fun onLeave(channelLeft: AudioChannel, guild: Guild, member: Member) {
+        getRegisteredData(channelLeft.idLong, guild.idLong)?.let {
+            // if no one exists in the voice channel...
+            if (channelLeft.members.size == 0) {
+                deleteTempChannel(guild, it.channelId, it.roleId)
+                deregisterTempChannel(it.bindingChannelId, it.guildId)
+            } else {
+                // remove role from the member.
+                guild.getRoleById(it.roleId)?.let { role ->
+                    guild.removeRoleFromMember(member, role).queue()
                 }
             }
         }
