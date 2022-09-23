@@ -3,7 +3,9 @@ package com.github.kitakkun.kottotto.event.manager
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelDataModel
 import com.github.kitakkun.kottotto.event.EventStore
+import com.github.kitakkun.kottotto.extensions.getString
 import dev.minn.jda.ktx.coroutines.await
+import dev.minn.jda.ktx.messages.Embed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +23,8 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class TempChannelManager @Inject constructor(
-    private val eventStore: EventStore
+    private val eventStore: EventStore,
+    private val bundle: ResourceBundle,
 ) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -69,6 +72,16 @@ class TempChannelManager @Inject constructor(
             guild.getRoleById(data.roleId)?.let {
                 guild.addRoleToMember(member, it).queue()
             }
+            // send welcome message.
+            guild.textChannels.find { it.idLong == data.channelId }?.sendMessageEmbeds(
+                Embed {
+                    title = bundle.getString("fun_temp_channel_msg_welcome_title")
+                    description = bundle.getString(
+                        "fun_temp_channel_msg_welcome_desc",
+                        guild.voiceChannels.find { it.idLong == data.bindingChannelId }?.name ?: ""
+                    )
+                }
+            )?.queue()
         } else {
             // update member's role.
             guild.getRoleById(entry.roleId)?.let {

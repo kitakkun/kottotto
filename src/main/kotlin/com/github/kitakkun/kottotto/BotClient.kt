@@ -8,8 +8,11 @@ import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.events.GenericEvent
 import net.dv8tion.jda.api.events.ReadyEvent
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.EventListener
 import net.dv8tion.jda.api.requests.GatewayIntent
@@ -31,6 +34,7 @@ class BotClient @Inject constructor(
                 GatewayIntent.GUILD_MEMBERS,
                 GatewayIntent.MESSAGE_CONTENT,
                 GatewayIntent.GUILD_EMOJIS_AND_STICKERS
+                GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
             )
             .addEventListeners(this)
             .build()
@@ -42,6 +46,9 @@ class BotClient @Inject constructor(
             if (event is MessageReceivedEvent) eventStore.produceMessageReceivedEvent(event)
             if (event is GuildVoiceJoinEvent) eventStore.produceGuildVoiceJoinEvent(event)
             if (event is GuildVoiceLeaveEvent) eventStore.produceGuildVoiceLeaveEvent(event)
+            if (event is GuildReadyEvent) eventStore.produceGuildReadyEvent(event)
+            if (event is SlashCommandInteractionEvent) eventStore.produceSlashCommandInteractionEvent(event)
+            if (event is GuildVoiceMoveEvent) eventStore.produceGuildVoiceMoveEvent(event)
         }
     }
 }
