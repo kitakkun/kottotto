@@ -77,7 +77,7 @@ class TempChannelManager @Inject constructor(
         }
     }
 
-    private suspend fun onLeave(channelLeft: AudioChannel, guild: Guild, member: Member) {
+    private fun onLeave(channelLeft: AudioChannel, guild: Guild, member: Member) {
         getRegisteredData(channelLeft.idLong, guild.idLong)?.let {
             // if no one exists in the voice channel...
             if (channelLeft.members.size == 0) {
@@ -108,7 +108,7 @@ class TempChannelManager @Inject constructor(
         )
     }
 
-    private suspend fun deleteTempChannel(guild: Guild, tempChannelId: Long, tempRoleId: Long) {
+    private fun deleteTempChannel(guild: Guild, tempChannelId: Long, tempRoleId: Long) {
         logger.debug { "Deleting a temporal private text channel at guild ${guild.id}" }
         guild.channels.find { channel -> channel.idLong == tempChannelId }?.delete()?.queue()
         guild.roles.find { role -> role.idLong == tempRoleId }?.delete()?.queue()
