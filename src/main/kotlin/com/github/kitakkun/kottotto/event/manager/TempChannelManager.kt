@@ -50,6 +50,7 @@ class TempChannelManager @Inject constructor(
                 } else {
                     // update member's role.
                     event.guild.getRoleById(entry[tempRoleId])?.let {
+                    event.guild.getRoleById(entry.roleId)?.let {
                         event.guild.addRoleToMember(event.member, it).queue()
                     }
                 }
@@ -62,9 +63,12 @@ class TempChannelManager @Inject constructor(
                     if (event.channelLeft.members.size == 0) {
                         deleteTempChannel(event.guild, it[tempChannelId], it[tempRoleId])
                         deregisterTempChannel(it[TempChannel.bindChannelId], it[TempChannel.guildId])
+                        deleteTempChannel(event.guild, it.channelId, it.roleId)
+                        deregisterTempChannel(it.bindingChannelId, it.guildId)
                     } else {
                         // remove role from the member.
                         event.guild.getRoleById(it[tempRoleId])?.let { role ->
+                        event.guild.getRoleById(it.roleId)?.let { role ->
                             event.guild.removeRoleFromMember(event.member, role).queue()
                         }
                     }
@@ -86,6 +90,7 @@ class TempChannelManager @Inject constructor(
             .await()
         return TempChannelDataModel(
             bindingChannelId,
+            bindingChannelId = bindingChannelId,
             channelId = channel.idLong,
             roleId = role.idLong,
             guildId = guild.idLong
@@ -119,10 +124,12 @@ class TempChannelManager @Inject constructor(
 
     private fun getRegisteredData(bindChannelId: Long, guildId: Long): ResultRow? = transaction {
         addLogger(StdOutSqlLogger)
+    private fun getRegisteredData(bindChannelId: Long, guildId: Long): TempChannelDataModel? = transaction {
         return@transaction TempChannel.select {
             TempChannel.bindChannelId eq bindChannelId
             TempChannel.guildId eq guildId
 
         }.firstOrNull()
+        }.firstOrNull()?.let { TempChannelDataModel.convert(it) }
     }
 }
