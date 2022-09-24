@@ -1,7 +1,7 @@
 package com.github.kitakkun.kottotto.event.manager
 
 import com.github.kitakkun.kottotto.database.TempChannel
-import com.github.kitakkun.kottotto.database.TempChannelDataModel
+import com.github.kitakkun.kottotto.database.TempChannelConfigData
 import com.github.kitakkun.kottotto.event.EventStore
 import com.github.kitakkun.kottotto.extensions.getString
 import dev.minn.jda.ktx.coroutines.await
@@ -105,7 +105,7 @@ class TempChannelManager @Inject constructor(
         }
     }
 
-    private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, bindingChannelId: Long): TempChannelDataModel {
+    private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, bindingChannelId: Long): TempChannelConfigData {
         logger.debug { "Creating a temporal private text channel at guild ${guild.id}" }
         val role = guild.createRole().setName(name).await()
         val channel = guild.createTextChannel(name)
@@ -113,7 +113,7 @@ class TempChannelManager @Inject constructor(
             .addRolePermissionOverride(guild.publicRole.idLong, null, EnumSet.of(Permission.VIEW_CHANNEL))
             .setParent(parentCategory)
             .await()
-        return TempChannelDataModel(
+        return TempChannelConfigData(
             bindingChannelId = bindingChannelId,
             channelId = channel.idLong,
             roleId = role.idLong,
@@ -147,11 +147,11 @@ class TempChannelManager @Inject constructor(
             }
         }
 
-    private fun getRegisteredData(bindChannelId: Long, guildId: Long): TempChannelDataModel? = transaction {
+    private fun getRegisteredData(bindChannelId: Long, guildId: Long): TempChannelConfigData? = transaction {
         addLogger(Slf4jSqlDebugLogger)
         return@transaction TempChannel.select {
             TempChannel.bindChannelId eq bindChannelId
             TempChannel.guildId eq guildId
-        }.firstOrNull()?.let { TempChannelDataModel.convert(it) }
+        }.firstOrNull()?.let { TempChannelConfigData.convert(it) }
     }
 }
