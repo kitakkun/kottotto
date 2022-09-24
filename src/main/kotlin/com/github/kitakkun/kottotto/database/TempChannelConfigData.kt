@@ -3,7 +3,7 @@ package com.github.kitakkun.kottotto.database
 import org.jetbrains.exposed.sql.ResultRow
 
 data class TempChannelConfigData(
-    val bindingChannelId: Long,
+    val voiceChannelId: Long,
     val roleId: Long,
     val channelId: Long,
     val guildId: Long,
@@ -11,9 +11,9 @@ data class TempChannelConfigData(
     companion object {
         fun convert(resultRow: ResultRow) : TempChannelConfigData =
             TempChannelConfigData(
-                bindingChannelId = resultRow[TempChannel.bindChannelId],
-                roleId = resultRow[TempChannel.tempRoleId],
-                channelId = resultRow[TempChannel.tempChannelId],
+                voiceChannelId = resultRow[TempChannel.voiceChannelId],
+                roleId = resultRow[TempChannel.roleId],
+                channelId = resultRow[TempChannel.textChannelId],
                 guildId = resultRow[TempChannel.guildId]
             )
     }

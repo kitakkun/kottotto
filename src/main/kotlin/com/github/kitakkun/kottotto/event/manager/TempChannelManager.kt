@@ -59,11 +59,11 @@ class TempChannelManager @Inject constructor(
                 name = channelJoined.name,
                 parentCategory = guild.categories.find { it.voiceChannels.contains(channelJoined) },
                 guild = guild,
-                bindingChannelId = channelJoined.idLong
+                voiceChannelId = channelJoined.idLong
             )
             // register ids to database.
             registerTempChannel(
-                bindingChannelId = data.bindingChannelId,
+                voiceChannelId = data.voiceChannelId,
                 roleId = data.roleId,
                 channelId = data.channelId,
                 guildId = data.guildId
@@ -78,7 +78,7 @@ class TempChannelManager @Inject constructor(
                     title = bundle.getString("fun_temp_channel_msg_welcome_title")
                     description = bundle.getString(
                         "fun_temp_channel_msg_welcome_desc",
-                        guild.voiceChannels.find { it.idLong == data.bindingChannelId }?.name ?: ""
+                        guild.voiceChannels.find { it.idLong == data.voiceChannelId }?.name ?: ""
                     )
                 }
             )?.queue()
@@ -95,7 +95,7 @@ class TempChannelManager @Inject constructor(
             // if no one exists in the voice channel...
             if (channelLeft.members.size == 0) {
                 deleteTempChannel(guild, it.channelId, it.roleId)
-                deregisterTempChannel(it.bindingChannelId, it.guildId)
+                deregisterTempChannel(it.voiceChannelId, it.guildId)
             } else {
                 // remove role from the member.
                 guild.getRoleById(it.roleId)?.let { role ->
@@ -105,7 +105,7 @@ class TempChannelManager @Inject constructor(
         }
     }
 
-    private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, bindingChannelId: Long): TempChannelConfigData {
+    private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, voiceChannelId: Long): TempChannelConfigData {
         logger.debug { "Creating a temporal private text channel at guild ${guild.id}" }
         val role = guild.createRole().setName(name).await()
         val channel = guild.createTextChannel(name)
@@ -114,7 +114,7 @@ class TempChannelManager @Inject constructor(
             .setParent(parentCategory)
             .await()
         return TempChannelConfigData(
-            bindingChannelId = bindingChannelId,
+            voiceChannelId = voiceChannelId,
             channelId = channel.idLong,
             roleId = role.idLong,
             guildId = guild.idLong
@@ -127,30 +127,30 @@ class TempChannelManager @Inject constructor(
         guild.roles.find { role -> role.idLong == tempRoleId }?.delete()?.queue()
     }
 
-    private fun registerTempChannel(bindingChannelId: Long, roleId: Long, channelId: Long, guildId: Long) =
+    private fun registerTempChannel(voiceChannelId: Long, roleId: Long, channelId: Long, guildId: Long) =
         transaction {
             addLogger(Slf4jSqlDebugLogger)
             TempChannel.insert {
-                it[bindChannelId] = bindingChannelId
-                it[tempRoleId] = roleId
-                it[tempChannelId] = channelId
+                it[TempChannel.voiceChannelId] = voiceChannelId
+                it[TempChannel.roleId] = roleId
+                it[TempChannel.textChannelId] = channelId
                 it[TempChannel.guildId] = guildId
             }
         }
 
-    private fun deregisterTempChannel(bindingChannelId: Long, guildId: Long) =
+    private fun deregisterTempChannel(voiceChannelId: Long, guildId: Long) =
         transaction {
             addLogger(Slf4jSqlDebugLogger)
             TempChannel.deleteWhere {
-                TempChannel.bindChannelId eq bindingChannelId
+                TempChannel.voiceChannelId eq voiceChannelId
                 TempChannel.guildId eq guildId
             }
         }
 
-    private fun getRegisteredData(bindChannelId: Long, guildId: Long): TempChannelConfigData? = transaction {
+    private fun getRegisteredData(voiceChannelId: Long, guildId: Long): TempChannelConfigData? = transaction {
         addLogger(Slf4jSqlDebugLogger)
         return@transaction TempChannel.select {
-            TempChannel.bindChannelId eq bindChannelId
+            TempChannel.voiceChannelId eq voiceChannelId
             TempChannel.guildId eq guildId
         }.firstOrNull()?.let { TempChannelConfigData.convert(it) }
     }
