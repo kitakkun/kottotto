@@ -3,6 +3,7 @@ package com.github.kitakkun.kottotto.event.manager
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData
 import com.github.kitakkun.kottotto.event.EventStore
+import com.github.kitakkun.kottotto.extensions.getCategoryByChannelId
 import com.github.kitakkun.kottotto.extensions.getString
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.Embed
@@ -57,7 +58,7 @@ class TempChannelManager @Inject constructor(
             // create private temporal channel and role.
             val data = createTempChannel(
                 name = channelJoined.name,
-                parentCategory = guild.categories.find { it.voiceChannels.contains(channelJoined) },
+                parentCategory = guild.getCategoryByChannelId(channelJoined.idLong),
                 guild = guild,
                 voiceChannelId = channelJoined.idLong
             )
@@ -104,6 +105,7 @@ class TempChannelManager @Inject constructor(
             }
         }
     }
+
 
     private suspend fun createTempChannel(guild: Guild, name: String, parentCategory: Category?, voiceChannelId: Long): TempChannelConfigData {
         logger.debug { "Creating a temporal private text channel at guild ${guild.id}" }
