@@ -65,7 +65,7 @@ class TempChannelManager @Inject constructor(
             registerTempChannel(
                 voiceChannelId = data.voiceChannelId,
                 roleId = data.roleId,
-                channelId = data.channelId,
+                textChannelId = data.channelId,
                 guildId = data.guildId
             )
             // update member's role.
@@ -73,12 +73,12 @@ class TempChannelManager @Inject constructor(
                 guild.addRoleToMember(member, it).queue()
             }
             // send welcome message.
-            guild.textChannels.find { it.idLong == data.channelId }?.sendMessageEmbeds(
+            guild.getTextChannelById(data.channelId)?.sendMessageEmbeds(
                 Embed {
                     title = bundle.getString("fun_temp_channel_msg_welcome_title")
                     description = bundle.getString(
                         "fun_temp_channel_msg_welcome_desc",
-                        guild.voiceChannels.find { it.idLong == data.voiceChannelId }?.name ?: ""
+                        guild.getVoiceChannelById(data.voiceChannelId)?.name ?: ""
                     )
                 }
             )?.queue()
@@ -121,19 +121,19 @@ class TempChannelManager @Inject constructor(
         )
     }
 
-    private fun deleteTempChannel(guild: Guild, tempChannelId: Long, tempRoleId: Long) {
+    private fun deleteTempChannel(guild: Guild, textChannelId: Long, roleId: Long) {
         logger.debug { "Deleting a temporal private text channel at guild ${guild.id}" }
-        guild.channels.find { channel -> channel.idLong == tempChannelId }?.delete()?.queue()
-        guild.roles.find { role -> role.idLong == tempRoleId }?.delete()?.queue()
+        guild.getTextChannelById(textChannelId)?.delete()?.queue()
+        guild.getRoleById(roleId)?.delete()?.queue()
     }
 
-    private fun registerTempChannel(voiceChannelId: Long, roleId: Long, channelId: Long, guildId: Long) =
+    private fun registerTempChannel(voiceChannelId: Long, roleId: Long, textChannelId: Long, guildId: Long) =
         transaction {
             addLogger(Slf4jSqlDebugLogger)
             TempChannel.insert {
                 it[TempChannel.voiceChannelId] = voiceChannelId
                 it[TempChannel.roleId] = roleId
-                it[TempChannel.textChannelId] = channelId
+                it[TempChannel.textChannelId] = textChannelId
                 it[TempChannel.guildId] = guildId
             }
         }
