@@ -46,6 +46,9 @@ dependencies {
 
     // LavaPlayer
     implementation("com.sedmelluq:lavaplayer:1.3.77")
+
+    // shell command
+    implementation("com.sealwu:kscript-tools:1.0.21")
 }
 
 application {
