@@ -43,6 +43,9 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.0")
     implementation("ch.qos.logback:logback-classic:1.4.1")
     implementation("org.slf4j:slf4j-api:2.0.1")
+
+    // LavaPlayer
+    implementation("com.sedmelluq:lavaplayer:1.3.77")
 }
 
 application {
