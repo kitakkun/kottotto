@@ -1,4 +1,4 @@
-package com.github.kitakkun.kottotto.event.manager
+package com.github.kitakkun.kottotto.eventmanager
 
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData

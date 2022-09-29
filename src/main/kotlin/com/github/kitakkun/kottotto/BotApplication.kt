@@ -5,7 +5,8 @@ import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.di.DaggerMyComponent
 import com.github.kitakkun.kottotto.di.MyModules
 import com.github.kitakkun.kottotto.event.EventStore
-import com.github.kitakkun.kottotto.event.manager.TempChannelManager
+import com.github.kitakkun.kottotto.eventmanager.ReadChannelEventManager
+import com.github.kitakkun.kottotto.eventmanager.TempChannelManager
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -20,6 +21,7 @@ class BotApplication {
     @Inject lateinit var eventStore: EventStore
     @Inject lateinit var botClient: BotClient
     @Inject lateinit var tempChannelManager: TempChannelManager
+    @Inject lateinit var readChannelEventManager: ReadChannelEventManager
 
     init {
         this.component.inject(this)

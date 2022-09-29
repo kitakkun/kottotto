@@ -33,7 +33,6 @@ class BotClient @Inject constructor(
                 GatewayIntent.GUILD_VOICE_STATES,
                 GatewayIntent.GUILD_MEMBERS,
                 GatewayIntent.MESSAGE_CONTENT,
-                GatewayIntent.GUILD_EMOJIS_AND_STICKERS
                 GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
             )
             .addEventListeners(this)
