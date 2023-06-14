@@ -1,14 +1,10 @@
 package com.github.kitakkun.kottotto
 
-import com.github.kitakkun.kottotto.database.ReadChannel
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData
-import dev.kord.common.entity.Snowflake
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transactionManager
-import javax.inject.Inject
 
 class TempChannelRepository(
     private val tempChannelTable: TempChannel,
@@ -29,8 +25,8 @@ class TempChannelRepository(
     }
 
     fun fetch(
-        voiceChannelId: ULong,
-        guildId: ULong,
+        voiceChannelId: Long,
+        guildId: Long,
     ): TempChannelConfigData? = transaction {
         addLogger(Slf4jSqlDebugLogger)
         tempChannelTable.select {
@@ -40,10 +36,10 @@ class TempChannelRepository(
     }
 
     fun create(
-        voiceChannelId: ULong,
-        roleId: ULong,
-        textChannelId: ULong,
-        guildId: ULong,
+        voiceChannelId: Long,
+        roleId: Long,
+        textChannelId: Long,
+        guildId: Long,
     ): Unit = transaction {
         addLogger(Slf4jSqlDebugLogger)
         TempChannel.insert {
@@ -55,13 +51,13 @@ class TempChannelRepository(
     }
 
     fun delete(
-        voiceChannelId: ULong,
-        guildId: ULong,
+        voiceChannelId: Long,
+        guildId: Long,
     ): Unit = transaction {
         addLogger(Slf4jSqlDebugLogger)
         tempChannelTable.deleteWhere {
-            tempChannelTable.voiceChannelId eq voiceChannelId
-            tempChannelTable.guildId eq guildId
+            tempChannelTable.voiceChannelId eq voiceChannelId and
+                    (tempChannelTable.guildId eq guildId)
         }
     }
 }

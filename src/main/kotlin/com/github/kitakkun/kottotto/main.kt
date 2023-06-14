@@ -1,33 +1,31 @@
 package com.github.kitakkun.kottotto
 
 import com.github.kitakkun.kottotto.di.koinModule
+import com.github.kitakkun.kottotto.feature.PingFeature
 import com.github.kitakkun.kottotto.feature.TempChannelFeature
-import com.github.kitakkun.kottotto.feature.setupPingCommand
-import dev.kord.core.Kord
-import dev.kord.gateway.Intent
-import dev.kord.gateway.Intents
-import dev.kord.gateway.PrivilegedIntent
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.requests.GatewayIntent
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
-@OptIn(PrivilegedIntent::class)
-suspend fun main() {
-    val kord = Kord(Config.get("TOKEN"))
-
+fun main() {
     startKoin {
         modules(koinModule)
     }
 
     val tempChannelFeature: TempChannelFeature by inject(TempChannelFeature::class.java)
-    tempChannelFeature.handleEvents(kord)
+    val pingFeature: PingFeature by inject(PingFeature::class.java)
 
-    setupPingCommand(kord)
-
-    kord.login {
-        intents = Intents(
-            Intent.GuildVoiceStates,
-            Intent.GuildMembers,
-            Intent.GuildIntegrations,
+    JDABuilder.createDefault(Config.get("TOKEN"))
+        .setEnabledIntents(
+            GatewayIntent.GUILD_MESSAGES,
+            GatewayIntent.GUILD_VOICE_STATES,
+            GatewayIntent.GUILD_MEMBERS,
+            GatewayIntent.MESSAGE_CONTENT,
+            GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
         )
-    }
+        .build().apply {
+            tempChannelFeature.register(this)
+            pingFeature.register(this)
+        }
 }

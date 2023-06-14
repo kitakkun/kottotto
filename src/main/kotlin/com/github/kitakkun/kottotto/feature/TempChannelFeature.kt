@@ -1,124 +1,141 @@
 package com.github.kitakkun.kottotto.feature
 
 import com.github.kitakkun.kottotto.TempChannelRepository
-import com.github.kitakkun.kottotto.database.TempChannel
-import com.github.kitakkun.kottotto.database.TempChannel.roleId
-import com.github.kitakkun.kottotto.database.TempChannelConfigData
 import com.github.kitakkun.kottotto.extensions.getCategoryByChannelId
-import com.github.kitakkun.kottotto.extensions.getString
-import dev.kord.common.entity.Snowflake
-import dev.kord.common.entity.optional.value
-import dev.kord.core.Kord
-import dev.kord.core.behavior.createRole
-import dev.kord.core.behavior.createTextChannel
-import dev.kord.core.behavior.getChannelOf
-import dev.kord.core.entity.channel.CategorizableChannel
-import dev.kord.core.entity.channel.VoiceChannel
-import dev.kord.core.event.user.VoiceStateUpdateEvent
-import dev.kord.core.on
 import dev.minn.jda.ktx.coroutines.await
-import dev.minn.jda.ktx.messages.Embed
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.Role
+import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.channel.concrete.Category
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel
-import okhttp3.internal.wait
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.util.*
-import javax.inject.Inject
 
 class TempChannelFeature(
     private val tempChannelRepository: TempChannelRepository,
-) {
-    fun handleEvents(kord: Kord) {
-        kord.on<VoiceStateUpdateEvent> {
-            when {
-                isJoinEvent() -> {
-                    handleJoinEvent(event = this)
-                }
+) : Feature, ListenerAdapter(), CoroutineScope {
+    override val coroutineContext = Job() + Dispatchers.IO
 
-                isMoveEvent() -> {
-                    handleMoveEvent(event = this)
-                }
+    override fun register(jda: JDA) {
+        jda.addEventListener(this)
+    }
 
-                isLeaveEvent() -> {
-                    handleLeaveEvent(event = this)
-                }
-            }
+    override fun onGuildVoiceJoin(event: GuildVoiceJoinEvent) {
+        launch {
+            handleJoinEvent(
+                channelJoined = event.channelJoined,
+                guild = event.guild,
+                member = event.member,
+            )
         }
     }
 
-    private suspend fun handleJoinEvent(event: VoiceStateUpdateEvent) {
-        val voiceChannelId = event.state.channelId ?: return
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
+        launch {
+            handleLeaveEvent(
+                channelLeft = event.channelLeft,
+                guild = event.guild,
+                member = event.member,
+            )
+        }
+    }
 
+    override fun onGuildVoiceMove(event: GuildVoiceMoveEvent) {
+        launch {
+            handleLeaveEvent(
+                channelLeft = event.channelLeft,
+                guild = event.guild,
+                member = event.member,
+            )
+            handleJoinEvent(
+                channelJoined = event.channelJoined,
+                guild = event.guild,
+                member = event.member,
+            )
+        }
+    }
+
+    private suspend fun handleJoinEvent(
+        guild: Guild,
+        member: Member,
+        channelJoined: AudioChannel,
+    ) {
         val tempChannelConfig = tempChannelRepository.fetch(
-            voiceChannelId = voiceChannelId.value,
-            guildId = event.state.guildId.value,
+            voiceChannelId = channelJoined.idLong,
+            guildId = guild.idLong,
         )
 
-        val guild = event.state.getGuild()
-
         if (tempChannelConfig != null) {
-            println("Config exists")
-            val member = guild.getMember(event.state.userId)
-            member.addRole(Snowflake(tempChannelConfig.roleId))
+            val role = guild.getRoleById(tempChannelConfig.roleId) ?: return
+            guild.addRoleToMember(member, role).queue()
             return
         }
 
-        val tempRole = guild.createRole {
-            name = "temp-${event.state.channelId}"
-            reason = "created by kottotto's TempChannelFeature"
-        }
-        val voiceChannel = guild.getChannel(voiceChannelId) as? CategorizableChannel ?: return
-        println(voiceChannel)
-        val tempChannel = guild.createTextChannel(name = "temp-${event.state.channelId}") {
-            parentId = voiceChannel.categoryId
-        }
-
-        tempChannelRepository.create(
-            voiceChannelId = voiceChannelId.value,
-            roleId = tempRole.id.value,
-            textChannelId = tempChannel.id.value,
-            guildId = event.state.guildId.value,
+        val (tempRole, tempChannel) = guild.createPrivateTextChannel(
+            parentCategory = guild.getCategoryByChannelId(channelJoined.idLong),
+            roleName = "temp-${channelJoined.idLong}",
+            channelName = "temp-${channelJoined.idLong}",
         )
 
-        val member = guild.getMember(event.state.userId)
-        member.addRole(tempRole.id)
+        tempChannelRepository.create(
+            voiceChannelId = channelJoined.idLong,
+            roleId = tempRole.idLong,
+            textChannelId = tempChannel.idLong,
+            guildId = guild.idLong,
+        )
+
+        guild.addRoleToMember(member, tempRole).queue()
     }
 
-    private suspend fun handleLeaveEvent(event: VoiceStateUpdateEvent) {
-        val voiceChannelId = event.old?.channelId ?: return
+    private suspend fun Guild.createPrivateTextChannel(
+        parentCategory: Category?,
+        roleName: String,
+        channelName: String,
+    ): Pair<Role, Channel> {
+        val tempRole = createRole()
+            .setName(roleName)
+            .await()
+        val tempChannel = createTextChannel(channelName)
+            .addRolePermissionOverride(tempRole.idLong, EnumSet.of(Permission.VIEW_CHANNEL), null)
+            .addRolePermissionOverride(publicRole.idLong, null, EnumSet.of(Permission.VIEW_CHANNEL))
+            .setParent(parentCategory)
+            .await()
+        return Pair(tempRole, tempChannel)
+    }
 
+    private fun handleLeaveEvent(
+        guild: Guild,
+        member: Member,
+        channelLeft: AudioChannel,
+    ) {
         val tempChannelConfig = tempChannelRepository.fetch(
-            voiceChannelId = voiceChannelId.value,
-            guildId = event.state.guildId.value,
+            voiceChannelId = channelLeft.idLong,
+            guildId = guild.idLong,
         ) ?: return
 
-        val guild = event.state.getGuild()
-        val voiceChannel = guild.getChannel(voiceChannelId)
-        if (voiceChannel.data.memberCount.value == 0) {
-            println(voiceChannel)
+        if (channelLeft.members.size == 0) {
             // TODO: error handling
-            guild.getChannelOrNull(Snowflake(tempChannelConfig.channelId))?.delete()
-            guild.getRoleOrNull(Snowflake(tempChannelConfig.roleId))?.delete()
+            guild.getGuildChannelById(tempChannelConfig.channelId)?.delete()?.queue()
+            guild.getRoleById(tempChannelConfig.roleId)?.delete()?.queue()
             tempChannelRepository.delete(
-                voiceChannelId = voiceChannelId.value,
-                guildId = event.state.guildId.value,
+                voiceChannelId = channelLeft.idLong,
+                guildId = guild.idLong,
             )
         } else {
-            guild.getMemberOrNull(event.state.userId)
-                ?.removeRole(Snowflake(tempChannelConfig.roleId))
+            guild.removeRoleFromMember(
+                member,
+                guild.getRoleById(tempChannelConfig.roleId) ?: return
+            ).queue()
         }
     }
-
-    private suspend fun handleMoveEvent(event: VoiceStateUpdateEvent) {
-        handleJoinEvent(event)
-        handleLeaveEvent(event)
-    }
 }
-
-internal fun VoiceStateUpdateEvent.isJoinEvent() = old?.channelId == null && state.channelId != null
-internal fun VoiceStateUpdateEvent.isMoveEvent() = old?.channelId != null && state.channelId != null
-internal fun VoiceStateUpdateEvent.isLeaveEvent() = old?.channelId != null && state.channelId == null

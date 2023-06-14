@@ -52,9 +52,6 @@ dependencies {
     // shell command
     implementation("com.sealwu:kscript-tools:1.0.21")
 
-    // kord
-    implementation("dev.kord:kord-core:0.9.0")
-
     // koin
     implementation("io.insert-koin:koin-core:3.4.2")
 }
