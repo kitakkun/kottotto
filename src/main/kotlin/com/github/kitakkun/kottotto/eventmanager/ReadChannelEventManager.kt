@@ -232,7 +232,7 @@ class ReadChannelEventManager @Inject constructor(
     }
 
     private fun deregisterFromDatabase(guildId: Long) = transaction {
-        ReadChannel.deleteWhere { ReadChannel.guildId eq guildId }
+//        ReadChannel.deleteWhere { ReadChannel.guildId eq guildId }
     }
 
 }

@@ -2,29 +2,18 @@ package com.github.kitakkun.kottotto
 
 import com.github.kitakkun.kottotto.database.ReadChannel
 import com.github.kitakkun.kottotto.database.TempChannel
-import com.github.kitakkun.kottotto.di.DaggerMyComponent
-import com.github.kitakkun.kottotto.di.MyModules
-import com.github.kitakkun.kottotto.event.EventStore
-import com.github.kitakkun.kottotto.eventmanager.ReadChannelEventManager
-import com.github.kitakkun.kottotto.eventmanager.TempChannelManager
+import com.github.kitakkun.kottotto.feature.TempChannelFeature
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import javax.inject.Inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class BotApplication {
+class BotApplication: KoinComponent {
 
-    private val component = DaggerMyComponent.builder()
-        .myModules(MyModules())
-        .build()
-
-    @Inject lateinit var eventStore: EventStore
-    @Inject lateinit var botClient: BotClient
-    @Inject lateinit var tempChannelManager: TempChannelManager
-    @Inject lateinit var readChannelEventManager: ReadChannelEventManager
+    private val tempChannelFeature: TempChannelFeature by inject()
 
     init {
-        this.component.inject(this)
         initDatabase()
     }
 

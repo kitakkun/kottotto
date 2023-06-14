@@ -25,11 +25,13 @@ dependencies {
     implementation("com.github.minndevelopment:jda-ktx:0.9.5-alpha.19")
 
     // Exposed
-    implementation("org.jetbrains.exposed", "exposed-core", "0.39.1")
-    implementation("org.jetbrains.exposed", "exposed-dao", "0.39.1")
-    implementation("org.jetbrains.exposed", "exposed-jdbc", "0.39.1")
+    val exposedVersion = "0.41.1"
+    implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-dao", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
     // mysql
-    implementation("mysql:mysql-connector-java:8.0.30")
+    implementation("mysql:mysql-connector-java:8.0.27")
+    implementation("org.postgresql:postgresql:42.3.1")
 
     // dotenv
     implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
@@ -49,6 +51,12 @@ dependencies {
 
     // shell command
     implementation("com.sealwu:kscript-tools:1.0.21")
+
+    // kord
+    implementation("dev.kord:kord-core:0.9.0")
+
+    // koin
+    implementation("io.insert-koin:koin-core:3.4.2")
 }
 
 application {

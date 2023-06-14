@@ -3,10 +3,10 @@ package com.github.kitakkun.kottotto.database
 import org.jetbrains.exposed.sql.ResultRow
 
 data class TempChannelConfigData(
-    val voiceChannelId: Long,
-    val roleId: Long,
-    val channelId: Long,
-    val guildId: Long,
+    val voiceChannelId: ULong,
+    val roleId: ULong,
+    val channelId: ULong,
+    val guildId: ULong,
 ) {
     companion object {
         fun convert(resultRow: ResultRow) : TempChannelConfigData =
