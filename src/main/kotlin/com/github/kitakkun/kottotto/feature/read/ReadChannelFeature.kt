@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -60,9 +60,7 @@ class ReadChannelFeature(
         }
         launch {
             messageFlow.collect { message ->
-                if (event.guild.audioManager.isConnected) {
-                    speak(guild, message)
-                }
+                speak(guild, message)
             }
         }
     }
@@ -181,9 +179,9 @@ class ReadChannelFeature(
         }
     }
 
-    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
-        if (event.channelLeft.members.none { !it.user.isBot }) {
-            event.channelLeft.leave()
+    override fun onGuildVoiceUpdate(event: GuildVoiceUpdateEvent) {
+        if (event.channelLeft?.members?.none { !it.user.isBot } == true) {
+            event.channelLeft?.leave()
             readChannelRepository.delete(event.guild.idLong)
         }
     }

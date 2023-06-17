@@ -20,7 +20,7 @@ dependencies {
     testImplementation(kotlin("test"))
 
     // JDA
-    implementation("net.dv8tion:JDA:5.0.0-alpha.19")
+    implementation("net.dv8tion:JDA:5.0.0-beta.10")
     // JDA-KTX
     implementation("com.github.minndevelopment:jda-ktx:0.9.5-alpha.19")
 

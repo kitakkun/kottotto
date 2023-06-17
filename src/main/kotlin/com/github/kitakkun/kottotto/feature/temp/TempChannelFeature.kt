@@ -15,9 +15,7 @@ import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.entities.channel.Channel
 import net.dv8tion.jda.api.entities.channel.concrete.Category
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.util.*
 
@@ -30,38 +28,22 @@ class TempChannelFeature(
         jda.addEventListener(this)
     }
 
-    override fun onGuildVoiceJoin(event: GuildVoiceJoinEvent) {
+    override fun onGuildVoiceUpdate(event: GuildVoiceUpdateEvent) {
         launch {
-            handleJoinEvent(
-                channelJoined = event.channelJoined,
-                guild = event.guild,
-                member = event.member,
-            )
-        }
-    }
-
-    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
-        launch {
-            handleLeaveEvent(
-                channelLeft = event.channelLeft,
-                guild = event.guild,
-                member = event.member,
-            )
-        }
-    }
-
-    override fun onGuildVoiceMove(event: GuildVoiceMoveEvent) {
-        launch {
-            handleLeaveEvent(
-                channelLeft = event.channelLeft,
-                guild = event.guild,
-                member = event.member,
-            )
-            handleJoinEvent(
-                channelJoined = event.channelJoined,
-                guild = event.guild,
-                member = event.member,
-            )
+            event.channelJoined?.let {
+                handleJoinEvent(
+                    channelJoined = it.asVoiceChannel(),
+                    guild = event.guild,
+                    member = event.member,
+                )
+            }
+            event.channelLeft?.let {
+                handleLeaveEvent(
+                    channelLeft = it.asVoiceChannel(),
+                    guild = event.guild,
+                    member = event.member,
+                )
+            }
         }
     }
 

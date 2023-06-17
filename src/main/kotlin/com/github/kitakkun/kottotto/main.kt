@@ -25,6 +25,7 @@ fun main() {
             GatewayIntent.GUILD_MEMBERS,
             GatewayIntent.MESSAGE_CONTENT,
             GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
+            GatewayIntent.SCHEDULED_EVENTS,
         )
         .build().apply {
             tempChannelFeature.register(this)
