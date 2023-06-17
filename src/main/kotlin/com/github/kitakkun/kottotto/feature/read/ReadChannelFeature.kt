@@ -7,6 +7,7 @@ import com.github.kitakkun.kottotto.lavaplayer.PlayerManager
 import com.github.kitakkun.kottotto.soundengine.SoundEngine
 import dev.minn.jda.ktx.interactions.commands.Command
 import dev.minn.jda.ktx.interactions.commands.Subcommand
+import dev.minn.jda.ktx.messages.MessageCreate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,9 +85,39 @@ class ReadChannelFeature(
             }
 
             "status" -> {
-                event.interaction.reply("status").queue()
+                handleStatusCommand(event)
             }
         }
+    }
+
+    private fun handleStatusCommand(event: SlashCommandInteractionEvent) {
+        val guildId = event.guild?.idLong ?: return event.reply("guild not found").queue()
+        val readConfig = readChannelRepository.fetch(guildId)
+        if (readConfig == null) {
+            event.reply("service not started").queue()
+            return
+        }
+        val voiceChannel = event.guild?.getVoiceChannelById(readConfig.voiceChannelId)
+        val textChannel = event.guild?.getTextChannelById(readConfig.textChannelId)
+        val owner = event.guild?.getMemberById(readConfig.ownerId)
+        val message = MessageCreate {
+            embed {
+                title = "read channel status"
+                field {
+                    name = "owner"
+                    value = owner?.asMention ?: "unknown"
+                }
+                field {
+                    name = "voice channel"
+                    value = voiceChannel?.name ?: "unknown"
+                }
+                field {
+                    name = "text channel"
+                    value = textChannel?.asMention ?: "unknown"
+                }
+            }
+        }
+        event.reply(message).queue()
     }
 
     private fun handleStartCommand(event: SlashCommandInteractionEvent) {
