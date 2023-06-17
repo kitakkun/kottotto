@@ -1,6 +1,6 @@
 package com.github.kitakkun.kottotto.feature.read
 
-import com.github.kitakkun.kottotto.database.ReadChannelConfigData
+import com.github.kitakkun.kottotto.database.ReadChannelConfig
 import com.github.kitakkun.kottotto.database.ReadChannelTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -31,10 +31,10 @@ class ReadChannelRepository(
         }
     }
 
-    fun fetch(guildId: Long): ReadChannelConfigData? = transaction(database) {
+    fun fetch(guildId: Long): ReadChannelConfig? = transaction(database) {
         readChannelTable.select {
             readChannelTable.guildId eq guildId
-        }.firstOrNull()?.let { ReadChannelConfigData.convert(it) }
+        }.firstOrNull()?.let { ReadChannelConfig.convert(it) }
     }
 
     fun delete(guildId: Long) = transaction(database) {

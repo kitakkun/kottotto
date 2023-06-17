@@ -1,6 +1,6 @@
 package com.github.kitakkun.kottotto.feature.temp
 
-import com.github.kitakkun.kottotto.database.TempChannelConfigData
+import com.github.kitakkun.kottotto.database.TempChannelConfig
 import com.github.kitakkun.kottotto.database.TempChannelTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -20,12 +20,12 @@ class TempChannelRepository(
     fun fetch(
         voiceChannelId: Long,
         guildId: Long,
-    ): TempChannelConfigData? = transaction(database) {
+    ): TempChannelConfig? = transaction(database) {
         addLogger(Slf4jSqlDebugLogger)
         tempChannelTable.select {
             tempChannelTable.voiceChannelId eq voiceChannelId
             tempChannelTable.guildId eq guildId
-        }.firstOrNull()?.let { TempChannelConfigData.convert(it) }
+        }.firstOrNull()?.let { TempChannelConfig.convert(it) }
     }
 
     fun create(
