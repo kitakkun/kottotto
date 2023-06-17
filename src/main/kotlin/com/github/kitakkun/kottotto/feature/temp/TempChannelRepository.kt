@@ -1,14 +1,14 @@
 package com.github.kitakkun.kottotto.feature.temp
 
-import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData
+import com.github.kitakkun.kottotto.database.TempChannelTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class TempChannelRepository(
     private val database: Database,
-    private val tempChannelTable: TempChannel,
+    private val tempChannelTable: TempChannelTable,
 ) {
     init {
         transaction(database) {
@@ -35,7 +35,7 @@ class TempChannelRepository(
         guildId: Long,
     ): Unit = transaction(database) {
         addLogger(Slf4jSqlDebugLogger)
-        TempChannel.insert {
+        TempChannelTable.insert {
             it[tempChannelTable.voiceChannelId] = voiceChannelId
             it[tempChannelTable.roleId] = roleId
             it[tempChannelTable.textChannelId] = textChannelId

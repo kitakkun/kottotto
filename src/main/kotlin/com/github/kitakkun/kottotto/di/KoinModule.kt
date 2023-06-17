@@ -1,8 +1,8 @@
 package com.github.kitakkun.kottotto.di
 
 import com.github.kitakkun.kottotto.Config
-import com.github.kitakkun.kottotto.database.ReadChannel
-import com.github.kitakkun.kottotto.database.TempChannel
+import com.github.kitakkun.kottotto.database.ReadChannelTable
+import com.github.kitakkun.kottotto.database.TempChannelTable
 import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelRepository
@@ -34,11 +34,11 @@ val koinModule = module {
 
     singleOf(::PingFeature)
 
-    single { TempChannel }
+    single { TempChannelTable }
     singleOf(::TempChannelRepository)
     singleOf(::TempChannelFeature)
 
-    single { ReadChannel }
+    single { ReadChannelTable }
     singleOf(::ReadChannelFeature)
     singleOf(::ReadChannelRepository)
 

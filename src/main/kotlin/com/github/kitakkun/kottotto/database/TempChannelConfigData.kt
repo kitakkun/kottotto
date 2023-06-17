@@ -9,12 +9,12 @@ data class TempChannelConfigData(
     val guildId: Long,
 ) {
     companion object {
-        fun convert(resultRow: ResultRow) : TempChannelConfigData =
+        fun convert(resultRow: ResultRow): TempChannelConfigData =
             TempChannelConfigData(
-                voiceChannelId = resultRow[TempChannel.voiceChannelId],
-                roleId = resultRow[TempChannel.roleId],
-                channelId = resultRow[TempChannel.textChannelId],
-                guildId = resultRow[TempChannel.guildId]
+                voiceChannelId = resultRow[TempChannelTable.voiceChannelId],
+                roleId = resultRow[TempChannelTable.roleId],
+                channelId = resultRow[TempChannelTable.textChannelId],
+                guildId = resultRow[TempChannelTable.guildId]
             )
     }
 }

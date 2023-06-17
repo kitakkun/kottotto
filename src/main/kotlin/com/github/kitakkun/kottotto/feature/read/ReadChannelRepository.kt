@@ -1,13 +1,13 @@
 package com.github.kitakkun.kottotto.feature.read
 
-import com.github.kitakkun.kottotto.database.ReadChannel
 import com.github.kitakkun.kottotto.database.ReadChannelConfigData
+import com.github.kitakkun.kottotto.database.ReadChannelTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ReadChannelRepository(
-    private val readChannelTable: ReadChannel,
+    private val readChannelTable: ReadChannelTable,
     private val database: Database,
 ) {
     init {

@@ -11,10 +11,10 @@ data class ReadChannelConfigData(
     companion object {
         fun convert(resultRow: ResultRow): ReadChannelConfigData =
             ReadChannelConfigData(
-                guildId = resultRow[ReadChannel.guildId],
-                textChannelId = resultRow[ReadChannel.textChannelId],
-                ownerId = resultRow[ReadChannel.ownerId],
-                voiceChannelId = resultRow[ReadChannel.voiceChannelId]
+                guildId = resultRow[ReadChannelTable.guildId],
+                textChannelId = resultRow[ReadChannelTable.textChannelId],
+                ownerId = resultRow[ReadChannelTable.ownerId],
+                voiceChannelId = resultRow[ReadChannelTable.voiceChannelId]
             )
     }
 }
