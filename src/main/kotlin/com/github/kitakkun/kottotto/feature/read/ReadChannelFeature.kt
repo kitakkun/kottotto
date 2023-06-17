@@ -121,7 +121,12 @@ class ReadChannelFeature(
 
     private fun handleStartCommand(event: SlashCommandInteractionEvent) {
         if (!isReadServiceAvailable(event.member)) {
-            event.reply("service unavailable").queue()
+            event.reply(MessageCreate {
+                embed {
+                    title = "ReadChannel unavailable"
+                    content = "You must be in a voice channel to use this command."
+                }
+            }).queue()
             return
         }
 
@@ -133,7 +138,14 @@ class ReadChannelFeature(
         )
 
         event.member?.voiceState?.channel?.join()
-        return event.reply("service started").queue()
+        return event.reply(MessageCreate {
+            embed {
+                title = "ReadChannel service successfully started"
+                field {
+                    description = "You can use `/read e` to end the service."
+                }
+            }
+        }).queue()
     }
 
     private fun isReadServiceAvailable(member: Member?): Boolean {
