@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -113,6 +114,7 @@ class ReadChannelFeature(
         textChannelId: Long,
         ownerId: Long,
     ) {
+        readChannelRepository.delete(guildId)
         readChannelRepository.create(
             guildId = guildId,
             voiceChannelId = voiceChannelId,
@@ -143,6 +145,13 @@ class ReadChannelFeature(
 
         launch {
             mutableMessageFlows[event.guild]?.emit(event.message.contentDisplay)
+        }
+    }
+
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
+        if (event.channelLeft.members.none { !it.user.isBot }) {
+            event.channelLeft.leave()
+            readChannelRepository.delete(event.guild.idLong)
         }
     }
 
