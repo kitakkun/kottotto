@@ -1,6 +1,7 @@
 package com.github.kitakkun.kottotto
 
 import com.github.kitakkun.kottotto.di.koinModule
+import com.github.kitakkun.kottotto.feature.gpt.GPTFeature
 import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
@@ -17,6 +18,7 @@ fun main() {
     val tempChannelFeature: TempChannelFeature by inject(TempChannelFeature::class.java)
     val pingFeature: PingFeature by inject(PingFeature::class.java)
     val readChannelFeature: ReadChannelFeature by inject(ReadChannelFeature::class.java)
+    val gptFeature: GPTFeature by inject(GPTFeature::class.java)
 
     JDABuilder.createDefault(Config.get("TOKEN"))
         .setEnabledIntents(
@@ -31,5 +33,6 @@ fun main() {
             tempChannelFeature.register(this)
             pingFeature.register(this)
             readChannelFeature.register(this)
+            gptFeature.register(this)
         }
 }

@@ -3,6 +3,7 @@ package com.github.kitakkun.kottotto.di
 import com.github.kitakkun.kottotto.Config
 import com.github.kitakkun.kottotto.database.ReadChannelTable
 import com.github.kitakkun.kottotto.database.TempChannelTable
+import com.github.kitakkun.kottotto.feature.gpt.GPTFeature
 import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelRepository
@@ -44,4 +45,6 @@ val koinModule = module {
 
     factory<SoundEngine> { OpenJTalkEngine() }
     single { PlayerManager() }
+
+    singleOf(::GPTFeature)
 }
