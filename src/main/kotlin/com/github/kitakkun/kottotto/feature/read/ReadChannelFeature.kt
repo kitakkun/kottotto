@@ -190,11 +190,6 @@ class ReadChannelFeature(
 
         launch {
             mutableMessageFlows[event.guild]?.emit(event.message.contentDisplay)
-            mutableMessageFlows[event.guild]?.emit(
-                event.message.embeds.joinToString("\n") {
-                    "${it.title} ${it.description}"
-                }
-            )
         }
     }
 
