@@ -179,6 +179,7 @@ class ReadChannelFeature(
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
         if (!event.isFromGuild) return
+        if (event.author.isBot) return
 
         val readConfig = readChannelRepository.fetch(event.guild.idLong) ?: return
         val textChannel = event.guild.getTextChannelById(readConfig.textChannelId) ?: return
