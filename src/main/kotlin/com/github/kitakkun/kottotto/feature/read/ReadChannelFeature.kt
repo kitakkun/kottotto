@@ -59,7 +59,9 @@ class ReadChannelFeature(
         }
         launch {
             messageFlow.collect { message ->
-                speak(guild, message)
+                if (event.guild.audioManager.isConnected) {
+                    speak(guild, message)
+                }
             }
         }
     }
