@@ -8,9 +8,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ReadChannelRepository(
     private val readChannelTable: ReadChannel,
+    private val database: Database,
 ) {
     init {
-        transaction {
+        transaction(database) {
             addLogger(Slf4jSqlDebugLogger)
             SchemaUtils.create(readChannelTable)
         }
@@ -21,7 +22,7 @@ class ReadChannelRepository(
         textChannelId: Long,
         ownerId: Long,
         voiceChannelId: Long,
-    ) = transaction {
+    ) = transaction(database) {
         readChannelTable.insert {
             it[this.guildId] = guildId
             it[this.textChannelId] = textChannelId
@@ -30,13 +31,13 @@ class ReadChannelRepository(
         }
     }
 
-    fun fetch(guildId: Long): ReadChannelConfigData? = transaction {
+    fun fetch(guildId: Long): ReadChannelConfigData? = transaction(database) {
         readChannelTable.select {
             readChannelTable.guildId eq guildId
         }.firstOrNull()?.let { ReadChannelConfigData.convert(it) }
     }
 
-    fun delete(guildId: Long) = transaction {
+    fun delete(guildId: Long) = transaction(database) {
         readChannelTable.deleteWhere {
             readChannelTable.guildId eq guildId
         }

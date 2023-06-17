@@ -1,6 +1,5 @@
 package com.github.kitakkun.kottotto.feature.temp
 
-import com.github.kitakkun.kottotto.Config
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData
 import org.jetbrains.exposed.sql.*
@@ -8,20 +7,11 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class TempChannelRepository(
+    private val database: Database,
     private val tempChannelTable: TempChannel,
 ) {
     init {
-        val dbUrl = Config.get("DB_URL") ?: throw Exception("DB_URL is not set")
-        val driver = Config.get("DB_DRIVER") ?: throw Exception("DB_DRIVER is not set")
-        val user = Config.get("DB_USER") ?: throw Exception("DB_USER is not set")
-        val password = Config.get("DB_PASSWORD") ?: throw Exception("DB_PASSWORD is not set")
-        Database.connect(
-            url = dbUrl,
-            driver = driver,
-            user = user,
-            password = password,
-        )
-        transaction {
+        transaction(database) {
             addLogger(Slf4jSqlDebugLogger)
             SchemaUtils.create(tempChannelTable)
         }
@@ -30,7 +20,7 @@ class TempChannelRepository(
     fun fetch(
         voiceChannelId: Long,
         guildId: Long,
-    ): TempChannelConfigData? = transaction {
+    ): TempChannelConfigData? = transaction(database) {
         addLogger(Slf4jSqlDebugLogger)
         tempChannelTable.select {
             tempChannelTable.voiceChannelId eq voiceChannelId
@@ -43,7 +33,7 @@ class TempChannelRepository(
         roleId: Long,
         textChannelId: Long,
         guildId: Long,
-    ): Unit = transaction {
+    ): Unit = transaction(database) {
         addLogger(Slf4jSqlDebugLogger)
         TempChannel.insert {
             it[tempChannelTable.voiceChannelId] = voiceChannelId
@@ -56,7 +46,7 @@ class TempChannelRepository(
     fun delete(
         voiceChannelId: Long,
         guildId: Long,
-    ): Unit = transaction {
+    ): Unit = transaction(database) {
         addLogger(Slf4jSqlDebugLogger)
         tempChannelTable.deleteWhere {
             tempChannelTable.voiceChannelId eq voiceChannelId and
