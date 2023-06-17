@@ -58,6 +58,9 @@ dependencies {
     implementation("io.insert-koin:koin-core:3.4.2")
 
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
+
+    // gpt4all binding
+    implementation("com.hexadevlabs:gpt4all-java-binding:1.1.2")
 }
 
 application {
