@@ -1,7 +1,7 @@
 package com.github.kitakkun.kottotto
 
 import com.github.kitakkun.kottotto.di.koinModule
-import com.github.kitakkun.kottotto.feature.PingFeature
+import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
 import net.dv8tion.jda.api.JDABuilder

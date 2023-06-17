@@ -2,7 +2,7 @@ package com.github.kitakkun.kottotto.di
 
 import com.github.kitakkun.kottotto.database.ReadChannel
 import com.github.kitakkun.kottotto.database.TempChannel
-import com.github.kitakkun.kottotto.feature.PingFeature
+import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelRepository
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature

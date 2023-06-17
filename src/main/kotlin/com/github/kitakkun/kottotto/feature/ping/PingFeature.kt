@@ -1,5 +1,6 @@
-package com.github.kitakkun.kottotto.feature
+package com.github.kitakkun.kottotto.feature.ping
 
+import com.github.kitakkun.kottotto.feature.Feature
 import dev.minn.jda.ktx.interactions.commands.Command
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -20,5 +21,4 @@ class PingFeature : Feature, ListenerAdapter() {
         if (event.name != command.name) return
         event.interaction.reply("pong!").queue()
     }
-
 }
