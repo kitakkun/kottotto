@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.Guild
@@ -59,7 +60,7 @@ class ReadChannelFeature(
             MutableSharedFlow()
         }
         launch {
-            messageFlow.collect { message ->
+            messageFlow.filter { it.isNotBlank() }.collect { message ->
                 speak(guild, message)
             }
         }
