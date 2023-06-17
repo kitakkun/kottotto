@@ -1,30 +1,13 @@
-package com.github.kitakkun.kottotto.eventmanager
+package com.github.kitakkun.kottotto.feature.temp
 
-import com.github.kitakkun.kottotto.database.TempChannel
-import com.github.kitakkun.kottotto.database.TempChannelConfigData
-import com.github.kitakkun.kottotto.event.EventStore
-import com.github.kitakkun.kottotto.extensions.getCategoryByChannelId
-import com.github.kitakkun.kottotto.extensions.getString
-import dev.minn.jda.ktx.coroutines.await
-import dev.minn.jda.ktx.messages.Embed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import mu.KotlinLogging
-import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.channel.concrete.Category
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class TempChannelManager @Inject constructor(
-    private val eventStore: EventStore,
     private val bundle: ResourceBundle,
 ) : CoroutineScope {
 

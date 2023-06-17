@@ -1,7 +1,7 @@
-package com.github.kitakkun.kottotto.feature
+package com.github.kitakkun.kottotto.feature.temp
 
-import com.github.kitakkun.kottotto.TempChannelRepository
 import com.github.kitakkun.kottotto.extensions.getCategoryByChannelId
+import com.github.kitakkun.kottotto.feature.Feature
 import dev.minn.jda.ktx.coroutines.await
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

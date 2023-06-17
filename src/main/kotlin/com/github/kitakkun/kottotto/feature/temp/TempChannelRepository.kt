@@ -1,5 +1,6 @@
-package com.github.kitakkun.kottotto
+package com.github.kitakkun.kottotto.feature.temp
 
+import com.github.kitakkun.kottotto.Config
 import com.github.kitakkun.kottotto.database.TempChannel
 import com.github.kitakkun.kottotto.database.TempChannelConfigData
 import org.jetbrains.exposed.sql.*
@@ -10,14 +11,16 @@ class TempChannelRepository(
     private val tempChannelTable: TempChannel,
 ) {
     init {
-        Config.apply {
-            Database.connect(
-                url = get("DB_URL"),
-                driver = get("DB_DRIVER"),
-                user = get("DB_USER"),
-                password = get("DB_PASSWORD")
-            )
-        }
+        val dbUrl = Config.get("DB_URL") ?: throw Exception("DB_URL is not set")
+        val driver = Config.get("DB_DRIVER") ?: throw Exception("DB_DRIVER is not set")
+        val user = Config.get("DB_USER") ?: throw Exception("DB_USER is not set")
+        val password = Config.get("DB_PASSWORD") ?: throw Exception("DB_PASSWORD is not set")
+        Database.connect(
+            url = dbUrl,
+            driver = driver,
+            user = user,
+            password = password,
+        )
         transaction {
             addLogger(Slf4jSqlDebugLogger)
             SchemaUtils.create(tempChannelTable)

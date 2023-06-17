@@ -9,8 +9,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.api.entities.Guild
 
-object PlayerManager {
-
+class PlayerManager {
     private val audioManagers = HashMap<Long, GuildAudioManager>()
     private val localPlayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
     private val remotePlayerManager: AudioPlayerManager = DefaultAudioPlayerManager()
