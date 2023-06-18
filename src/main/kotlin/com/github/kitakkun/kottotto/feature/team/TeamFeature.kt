@@ -79,6 +79,9 @@ class TeamFeature : Feature, ListenerAdapter() {
         val members = event.message.embeds.flatMap { it.fields.map { it.value } }.filterNotNull()
             .filterNot { it.isBlank() }
 
+        // do nothing if the user is not in the message
+        if (!members.contains(event.user.asMention)) return
+
         // calculate backward the number of members per team
         val oneTeamMemberCount = (members.size + 1) / teamCount
 
