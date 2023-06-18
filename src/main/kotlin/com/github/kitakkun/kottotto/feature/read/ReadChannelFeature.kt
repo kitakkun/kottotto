@@ -209,9 +209,13 @@ class ReadChannelFeature(
     }
 
     private fun speak(guild: Guild, message: String) {
-        val file = File("${WORKING_DIRECTORY.absolutePathString()}/${guild.idLong}.txt")
-        file.writeText(message, Charsets.UTF_8)
-        val soundFile = soundEngine.generateSoundFileFromText(inputTextFilePath = file.absolutePath) ?: return
-        playerManager.loadLocalSourceAndPlay(guild = guild, url = soundFile.absolutePath)
+        val inputTextFile = File("${WORKING_DIRECTORY.absolutePathString()}/${guild.idLong}.txt")
+        val outputSoundFile = File("${WORKING_DIRECTORY.absolutePathString()}/${guild.idLong}.wav")
+        inputTextFile.writeText(message, Charsets.UTF_8)
+        soundEngine.generateSoundFileFromText(
+            inputTextFile = inputTextFile,
+            outputSoundFile = outputSoundFile,
+        )
+        playerManager.loadLocalSourceAndPlay(guild = guild, url = outputSoundFile.absolutePath)
     }
 }

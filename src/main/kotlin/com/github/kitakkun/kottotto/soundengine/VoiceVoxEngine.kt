@@ -6,16 +6,18 @@ import java.io.File
 
 // TODO: support voicevox
 class VoiceVoxEngine : SoundEngine {
-    override fun generateSoundFileFromText(inputTextFilePath: String): File? {
-        val serverUrl = Config.get("VOICEVOX_SERVER_URL") ?: return null
+    override fun generateSoundFileFromText(
+        inputTextFile: File,
+        outputSoundFile: File,
+    ) {
+        val serverUrl = Config.get("VOICEVOX_SERVER_URL") ?: return
         val queryProcess = """
-                curl -s \
-                -X POST" \
-                "$serverUrl/audio_query?speaker=1" \
-                --get -data-urlencode text@$inputTextFilePath \
-                > query.json
-                """
-            .runCommand()
+            curl -s \
+            -X POST" \
+            "$serverUrl/audio_query?speaker=1" \
+            --get -data-urlencode text@${inputTextFile.absolutePath} \
+            > query.json
+            """.runCommand()
         queryProcess.waitFor()
         queryProcess.destroy()
         val synthesisProcess = """
@@ -24,10 +26,9 @@ class VoiceVoxEngine : SoundEngine {
             -X POST \
             -d @query.json \
             "$serverUrl/synthesis?speaker=1" \
-            > audio.wav
+            > ${outputSoundFile.absolutePath}
         """.runCommand()
         synthesisProcess.waitFor()
         synthesisProcess.destroy()
-        return File("audio.wav")
     }
 }
