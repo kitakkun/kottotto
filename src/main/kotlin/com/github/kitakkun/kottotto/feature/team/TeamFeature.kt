@@ -1,5 +1,6 @@
 package com.github.kitakkun.kottotto.feature.team
 
+import com.github.kitakkun.kottotto.extensions.emitEmbeds
 import com.github.kitakkun.kottotto.feature.Feature
 import dev.minn.jda.ktx.interactions.commands.Command
 import dev.minn.jda.ktx.interactions.components.button
@@ -15,6 +16,10 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 
 class TeamFeature : Feature, ListenerAdapter() {
+    companion object {
+        private const val buttonExpirationSeconds: Long = 30
+    }
+
     private val command = Command(
         name = "team",
         description = "sort out members in voice channel to teams"
@@ -71,6 +76,8 @@ class TeamFeature : Feature, ListenerAdapter() {
     override fun onButtonInteraction(event: ButtonInteractionEvent) {
         if (event.componentId != "team_regenerate") return
 
+        if (disableButtonIfExpired(event)) return
+
         // number of fields equals to the number of teams
         val fields = event.message.embeds.flatMap { it.fields }
         val teamCount = fields.size
@@ -109,6 +116,29 @@ class TeamFeature : Feature, ListenerAdapter() {
                 )
             )
         }
+    }
+
+    private fun disableButtonIfExpired(event: ButtonInteractionEvent): Boolean {
+        val buttonClickedTime = event.timeCreated.toEpochSecond()
+        val messageCreatedTime = event.message.timeCreated.toEpochSecond()
+        if (buttonClickedTime - messageCreatedTime > buttonExpirationSeconds) {
+            event.editMessage(
+                MessageEdit {
+                    emitEmbeds(event.message.embeds)
+                    embed {
+                        description = "You cannot re-generate teams after $buttonExpirationSeconds seconds.\n" +
+                                "Please re-run the command to generate new teams."
+                    }
+                    actionRow(
+                        event.button.asDisabled()
+                            .withLabel("Expired")
+                            .withStyle(ButtonStyle.DANGER)
+                    )
+                }
+            ).queue()
+            return true
+        }
+        return false
     }
 
 }
