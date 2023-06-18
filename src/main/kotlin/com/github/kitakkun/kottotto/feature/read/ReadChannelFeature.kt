@@ -25,6 +25,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter
 import java.io.File
 import java.util.*
 import kotlin.coroutines.CoroutineContext
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempDirectory
 
 class ReadChannelFeature(
     bundle: ResourceBundle,
@@ -32,6 +34,12 @@ class ReadChannelFeature(
     private val soundEngine: SoundEngine,
     private val playerManager: PlayerManager,
 ) : Feature, ListenerAdapter(), CoroutineScope {
+    companion object {
+        private val WORKING_DIRECTORY = createTempDirectory(
+            prefix = "kottotto-read-channel-feature"
+        )
+    }
+
     override val coroutineContext: CoroutineContext get() = Job() + Dispatchers.IO
 
     private val command = Command(name = "read", description = bundle.getString("cmd_read_desc")) {
@@ -201,7 +209,7 @@ class ReadChannelFeature(
     }
 
     private fun speak(guild: Guild, message: String) {
-        val file = File("test.txt")
+        val file = File("${WORKING_DIRECTORY.absolutePathString()}/${guild.idLong}.txt")
         file.writeText(message, Charsets.UTF_8)
         val soundFile = soundEngine.generateSoundFileFromText(inputTextFilePath = file.absolutePath) ?: return
         playerManager.loadLocalSourceAndPlay(guild = guild, url = soundFile.absolutePath)
