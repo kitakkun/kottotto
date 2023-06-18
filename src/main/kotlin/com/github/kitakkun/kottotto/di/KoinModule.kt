@@ -7,6 +7,7 @@ import com.github.kitakkun.kottotto.feature.gpt.GPTFeature
 import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelRepository
+import com.github.kitakkun.kottotto.feature.team.TeamFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelRepository
 import com.github.kitakkun.kottotto.lavaplayer.PlayerManager
@@ -47,4 +48,6 @@ val koinModule = module {
     single { PlayerManager() }
 
     singleOf(::GPTFeature)
+
+    singleOf(::TeamFeature)
 }
