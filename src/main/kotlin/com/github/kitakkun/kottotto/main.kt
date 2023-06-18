@@ -4,6 +4,7 @@ import com.github.kitakkun.kottotto.di.koinModule
 import com.github.kitakkun.kottotto.feature.gpt.GPTFeature
 import com.github.kitakkun.kottotto.feature.ping.PingFeature
 import com.github.kitakkun.kottotto.feature.read.ReadChannelFeature
+import com.github.kitakkun.kottotto.feature.team.TeamFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.requests.GatewayIntent
@@ -19,6 +20,7 @@ fun main() {
     val pingFeature: PingFeature by inject(PingFeature::class.java)
     val readChannelFeature: ReadChannelFeature by inject(ReadChannelFeature::class.java)
     val gptFeature: GPTFeature by inject(GPTFeature::class.java)
+    val teamFeature: TeamFeature by inject(TeamFeature::class.java)
 
     JDABuilder.createDefault(Config.get("TOKEN"))
         .setEnabledIntents(
@@ -34,5 +36,6 @@ fun main() {
             pingFeature.register(this)
             readChannelFeature.register(this)
             gptFeature.register(this)
+            teamFeature.register(this)
         }
 }
