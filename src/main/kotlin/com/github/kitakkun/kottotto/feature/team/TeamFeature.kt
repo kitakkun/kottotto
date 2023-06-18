@@ -50,7 +50,7 @@ class TeamFeature : Feature, ListenerAdapter() {
             return
         }
 
-        val members = voiceChannel.members
+        val members = voiceChannel.members.filterNot { it.user.isBot }
         if (members.size < 2) {
             event.reply("There are not enough members in the voice channel. At least 2 members are required.").queue()
             return
