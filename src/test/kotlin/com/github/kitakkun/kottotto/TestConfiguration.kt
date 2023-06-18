@@ -20,4 +20,14 @@ class TestConfiguration {
         assertNotNull(Config.get("OPEN_JTALK_HTS_VOICE"))
         assertNotNull(Config.get("OPEN_JTALK_DICTIONARY"))
     }
+
+    @Test
+    fun testIfGPTConfigurationIsValid() {
+        assertNotNull(Config.get("GPT4ALL_MODEL_PATH"))
+    }
+
+    @Test
+    fun testIfVoiceVoxConfigurationIsValid() {
+        assertNotNull(Config.get("VOICEVOX_SERVER_URL"))
+    }
 }
