@@ -5,6 +5,7 @@ plugins {
     kotlin("kapt") version "1.7.10"
     application
     id("com.github.johnrengelman.shadow") version "7.0.0"
+    kotlin("plugin.serialization") version "1.7.10"
 }
 
 group = "com.github.kitakkun"
@@ -61,6 +62,8 @@ dependencies {
 
     // gpt4all binding
     implementation("com.hexadevlabs:gpt4all-java-binding:1.1.2")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 }
 
 application {
