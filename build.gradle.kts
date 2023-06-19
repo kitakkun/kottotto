@@ -64,6 +64,8 @@ dependencies {
     implementation("com.hexadevlabs:gpt4all-java-binding:1.1.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    // gson
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 application {
