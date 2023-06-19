@@ -66,6 +66,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     // gson
     implementation("com.google.code.gson:gson:2.8.9")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 }
 
 application {
