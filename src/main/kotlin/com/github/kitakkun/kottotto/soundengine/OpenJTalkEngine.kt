@@ -4,7 +4,7 @@ import com.github.kitakkun.kottotto.Config
 import java.io.File
 
 class OpenJTalkEngine : SoundEngine {
-    override fun generateSoundFileFromText(
+    override suspend fun generateSoundFileFromText(
         inputTextFile: File,
         outputSoundFile: File,
     ) {

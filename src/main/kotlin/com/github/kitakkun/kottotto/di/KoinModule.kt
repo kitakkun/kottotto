@@ -11,11 +11,15 @@ import com.github.kitakkun.kottotto.feature.team.TeamFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelRepository
 import com.github.kitakkun.kottotto.lavaplayer.PlayerManager
-import com.github.kitakkun.kottotto.soundengine.OpenJTalkEngine
 import com.github.kitakkun.kottotto.soundengine.SoundEngine
+import com.github.kitakkun.kottotto.soundengine.VoiceVoxEngine
+import com.github.kitakkun.ktvox.api.KtVoxApi
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
 val koinModule = module {
@@ -44,7 +48,19 @@ val koinModule = module {
     singleOf(::ReadChannelFeature)
     singleOf(::ReadChannelRepository)
 
-    factory<SoundEngine> { OpenJTalkEngine() }
+    factory<SoundEngine> { VoiceVoxEngine(get()) }
+
+    single<Retrofit>(named("voicevox")) {
+        Retrofit.Builder()
+            .baseUrl(Config.get("VOICEVOX_SERVER_URL") ?: throw Exception("VOICEVOX_SERVER_URL is not set"))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+    factory<KtVoxApi> {
+        val retrofit: Retrofit = get(named("voicevox"))
+        retrofit.create(KtVoxApi::class.java)
+    }
+
     single { PlayerManager() }
 
     singleOf(::GPTFeature)

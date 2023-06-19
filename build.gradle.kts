@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    implementation("com.github.kitakkun.ktvox:kt-vox:1.0-SNAPSHOT")
     testImplementation(kotlin("test"))
 
     // JDA
@@ -61,6 +62,9 @@ dependencies {
 
     // gpt4all binding
     implementation("com.hexadevlabs:gpt4all-java-binding:1.1.2")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
 
 application {
