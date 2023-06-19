@@ -5,7 +5,6 @@ plugins {
     kotlin("kapt") version "1.7.10"
     application
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    kotlin("plugin.serialization") version "1.7.10"
 }
 
 group = "com.github.kitakkun"
@@ -58,24 +57,13 @@ dependencies {
 
     // koin
     implementation("io.insert-koin:koin-core:3.3.3")
-    testImplementation("io.insert-koin:koin-test-junit5:3.3.3") {
-        // avoid conflict with junit
-        exclude("junit", "junit")
-        exclude("org.jetbrains.kotlin", "kotlin-test-junit")
-    }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
 
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
 
     // gpt4all binding
     implementation("com.hexadevlabs:gpt4all-java-binding:1.1.2")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-    // gson
-    implementation("com.google.code.gson:gson:2.8.9")
-
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
 
 application {
