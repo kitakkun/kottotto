@@ -57,6 +57,7 @@ dependencies {
 
     // koin
     implementation("io.insert-koin:koin-core:3.4.2")
+    testImplementation("io.insert-koin:koin-test:3.4.1")
 
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
 
