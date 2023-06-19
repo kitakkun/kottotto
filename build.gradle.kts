@@ -57,8 +57,13 @@ dependencies {
     implementation("com.sealwu:kscript-tools:1.0.21")
 
     // koin
-    implementation("io.insert-koin:koin-core:3.4.2")
-    testImplementation("io.insert-koin:koin-test:3.4.1")
+    implementation("io.insert-koin:koin-core:3.3.3")
+    testImplementation("io.insert-koin:koin-test-junit5:3.3.3") {
+        // avoid conflict with junit
+        exclude("junit", "junit")
+        exclude("org.jetbrains.kotlin", "kotlin-test-junit")
+    }
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
 
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
 
@@ -70,6 +75,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
 
 application {
