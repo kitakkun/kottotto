@@ -1,6 +1,7 @@
-package com.github.kitakkun.kottotto.soundengine
+package com.github.kitakkun.kottotto.soundengine.voicevox
 
 import com.github.kitakkun.kottotto.Config
+import com.github.kitakkun.kottotto.soundengine.SoundEngine
 import java.io.File
 
 class VoiceVoxEngine : SoundEngine {
