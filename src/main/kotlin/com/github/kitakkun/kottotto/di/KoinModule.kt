@@ -12,7 +12,7 @@ import com.github.kitakkun.kottotto.feature.temp.TempChannelFeature
 import com.github.kitakkun.kottotto.feature.temp.TempChannelRepository
 import com.github.kitakkun.kottotto.lavaplayer.PlayerManager
 import com.github.kitakkun.kottotto.soundengine.SoundEngine
-import com.github.kitakkun.kottotto.soundengine.voicevox.VoiceVoxEngine
+import com.github.kitakkun.kottotto.soundengine.VoiceVoxEngine
 import com.github.kitakkun.ktvox.api.KtVoxApi
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.module.dsl.singleOf
