@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.kitakkun.ktvox:kt-vox:1.0-SNAPSHOT")
+    implementation("com.github.kitakkun:kt-vox:0.0.1")
     testImplementation(kotlin("test"))
 
     // JDA
